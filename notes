@@ -1,0 +1,6 @@
+
+
+Write on Redux- const dispatch  = useDispatch();
+                dispatch(addTrailer(trailer));
+
+Read from Redux - const trailerVideo = useSelector((store) => store?.movies?.trailerVideo);

@@ -1,29 +1,92 @@
 import React, { useRef, useState } from "react";
 import Header from "./Header";
 import checkValidateData from "../utils/validate";
+import { updateProfile } from "firebase/auth";
+import { addUser } from "../utils/userSlice";
+import {
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+} from "firebase/auth";
+import { auth } from "../utils/firebase";
+import { useDispatch } from "react-redux";
+import { DEFAULT_DP } from "../utils/constant";
 const Login = () => {
+  const dispatch = useDispatch;
   const [isSignInForm, setIsSignInForm] = useState(true);
   const toggleSignInForm = () => {
-    console.log(isSignInForm);
     setIsSignInForm(!isSignInForm);
   };
-  const [errorMessage ,setErrorMessage ]= useState("")
+  const [errorMessage, setErrorMessage] = useState("");
   const email = useRef(null);
   const password = useRef(null);
   const fullname = useRef(null);
-  console.log(email);
-  console.log(password);
   const handleButtonClick = () => {
     //Validate FormData
-    console.log(email.current.value);
-    console.log(password.current.value);
     const isverify = checkValidateData(
       email.current.value,
       password.current.value
     );
+    setErrorMessage(isverify);
+
     if (isverify != null) {
-      setErrorMessage(isverify)
-    } 
+      return;
+    }
+    if (!isSignInForm) {
+      createUserWithEmailAndPassword(
+        auth,
+        email.current.value,
+        password.current.value
+      )
+        .then((userCredential) => {
+          // Signed in
+          const user = userCredential.user;
+          updateProfile(user, {
+            displayName: fullname.current.value,
+            photoURL: DEFAULT_DP,
+          })
+            .then(() => {
+              const { uid, email, displayName, photoURL } = auth.currentUser;
+              dispatch(
+                addUser({ uid: uid, email: email, displayName: photoURL })
+              );
+            })
+            .catch((error) => {
+              setErrorMessage(error.message + error.code);
+              console.log("error");
+            });
+          console.log(user);
+          // ...
+        })
+        .catch((error) => {
+          const errorCode = error.code;
+          const errorMessage = error.message;
+          setErrorMessage(isverify);
+          console.log(errorMessage + errorCode);
+
+          // ..
+        });
+
+      // update user profile
+    } else {
+      signInWithEmailAndPassword(
+        auth,
+        email.current.value,
+        password.current.value
+      )
+        .then((userCredential) => {
+          // Signed in
+          const user = userCredential.user;
+          console.log("sign In");
+          console.log(user);
+          // ...
+        })
+        .catch((error) => {
+          const errorCode = error.code;
+          const errorMessage = error.message;
+          setErrorMessage(errorCode + errorMessage);
+          console.log(errorCode + errorMessage);
+        });
+    }
   };
   return (
     <div>
@@ -43,7 +106,7 @@ const Login = () => {
           <input
             type="text"
             placeholder="Email or phone number"
-            className="m-auto p-2 rounded-md w-[334px] h-12 bg-gray-800"
+            className="m-auto p-2 rounded-md w-[334px] h-12 bg-gray-800 text-white"
             ref={email}
           ></input>
           {!isSignInForm && (
@@ -51,7 +114,7 @@ const Login = () => {
               ref={fullname}
               type="text"
               placeholder="Full Name"
-              className="m-auto my-6 p-2 rounded-md w-[334px] h-12 bg-gray-800"
+              className="m-auto my-6 p-2 rounded-md w-[334px] h-12 bg-gray-800 text-white"
             ></input>
           )}
           <br></br>
@@ -59,7 +122,7 @@ const Login = () => {
             ref={password}
             type="password"
             placeholder="password"
-            className="m-auto my-6 bg-gray-800 p-2 rounded-md w-[334px] h-12"
+            className="m-auto my-6 bg-gray-800 p-2 rounded-md w-[334px] h-12 text-white"
           ></input>
           <p className="text-red-700 font-bold text-lg">{errorMessage}</p>
           <button
