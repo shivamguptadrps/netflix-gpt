@@ -15,7 +15,6 @@ const Header = () => {
   const handleSignout = () => {
     signOut(auth)
       .then(() => {
-        console.log("Succesfully Logout");
         dispatch(removeUser());
         navigate("/");
       })
@@ -26,12 +25,16 @@ const Header = () => {
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (user) {
-        // User is signed in, see docs for a list of available properties
-        // https://firebase.google.com/docs/reference/js/auth.user
         const { uid, email, displayName, photoURL } = user;
-        dispatch(addUser({ uid: uid, email: email, displayName: photoURL }));
+        dispatch(
+          addUser({
+            uid: uid,
+            email: email,
+            displayName: displayName,
+            photoURL: photoURL,
+          })
+        );
         navigate("/browse");
-        // ...
       } else {
         dispatch(removeUser());
         navigate("/");
@@ -44,11 +47,7 @@ const Header = () => {
       <img className="w-60" src={LOGO} alt="logo"></img>
       {user && (
         <div className="h-14 w-118 flex mx-8 my-4">
-          <img
-            src={user.displayName}
-            alt="david"
-            className="rounded-full"
-          ></img>
+          <img src={user.photoURL} alt="david" className="rounded-full"></img>
           <button
             className="font-bold text-white h-6 my-3  w-20 rounded-lg"
             onClick={handleSignout}

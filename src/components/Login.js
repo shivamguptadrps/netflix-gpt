@@ -52,16 +52,13 @@ const Login = () => {
             })
             .catch((error) => {
               setErrorMessage(error.message + error.code);
-              console.log("error");
             });
-          console.log(user);
           // ...
         })
         .catch((error) => {
           const errorCode = error.code;
           const errorMessage = error.message;
           setErrorMessage(isverify);
-          console.log(errorMessage + errorCode);
 
           // ..
         });
@@ -76,15 +73,12 @@ const Login = () => {
         .then((userCredential) => {
           // Signed in
           const user = userCredential.user;
-          console.log("sign In");
-          console.log(user);
           // ...
         })
         .catch((error) => {
           const errorCode = error.code;
           const errorMessage = error.message;
           setErrorMessage(errorCode + errorMessage);
-          console.log(errorCode + errorMessage);
         });
     }
   };
